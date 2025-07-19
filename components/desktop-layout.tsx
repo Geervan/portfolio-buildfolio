@@ -18,6 +18,7 @@ export default function DesktopLayout() {
   useEffect(() => {
     const welcomeTimer = setTimeout(() => {
       addNotification("Hey there you're here\nWelcome!!! do explore all the elements and hey have fun!!");
+      addNotification("PS. For Mobile Judging an Android is preferred over iPhone since ios has some issues for the viewport")
       }, 1000);
 
       return () => clearTimeout(welcomeTimer)
