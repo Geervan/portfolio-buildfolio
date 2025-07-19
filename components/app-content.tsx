@@ -1,7 +1,7 @@
 "use client"
 import { apps } from "@/lib/apps-data";
-
-import { motion } from "framer-motion"
+import ContactModal from "@/components/ContactModal";
+import { motion,AnimatePresence } from "framer-motion"
 import { useState, useEffect } from "react" // useEffect is added for the new apps
 import { 
   Download, 
@@ -120,187 +120,153 @@ export default function AppContent({ app, isMobile = false, onOpenApp, onShutdow
         )
 
       case "email":
-        const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-        return (
-          <div className="h-full bg-white flex relative lg:static">
-            {/* Sidebar */}
-            <div
-              className={`w-64 bg-gray-50 border-r border-gray-200 flex flex-col
-                         fixed lg:static inset-y-0 left-0 z-20
-                         transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-                         lg:translate-x-0 transition-transform duration-300 ease-in-out`}
+  return (
+    // AnimatePresence should wrap the modal, but the main layout should be outside
+    // to prevent the entire email app from unmounting.
+    <>
+      <div className="h-full bg-white flex relative lg:static">
+        {/* Sidebar */}
+        <div
+          className={`w-64 bg-gray-50 border-r border-gray-200 flex flex-col
+                      fixed lg:static inset-y-0 left-0 z-20
+                      transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+                      lg:translate-x-0 transition-transform duration-300 ease-in-out`}
+        >
+          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
             >
-              <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+              <Send className="w-4 h-4" />
+              <a href="mailto:geervan99@gmail.com" target="_blank">Get in touch</a>
+            </motion.button>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="lg:hidden p-2 -mr-2"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
+
+          <div className="flex-1 p-2">
+            <div className="space-y-1">
+              {[
+                { icon: Inbox, label: "Inbox", count: 3, active: true },
+                { icon: Star, label: "Starred", count: 0 },
+                { icon: Send, label: "Sent", count: 12 },
+                { icon: Archive, label: "Archive", count: 45 },
+                { icon: Trash2, label: "Trash", count: 2 },
+              ].map((item, i) => (
+                <motion.div
+                  key={item.label}
+                  whileHover={{ backgroundColor: "rgba(59, 130, 246, 0.1)" }}
+                  className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer ${
+                    item.active ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
+                  }`}
                 >
-                  <Send className="w-4 h-4" />
-                  {/* <span>Compose/ Get in touch</span> */}
-                  <a href="mailto:geervan99@gmail.com" target="_blank">Get in touch</a>
-                </motion.button>
-                {/* Close button for mobile sidebar */}
-                <button
-                  onClick={() => setIsSidebarOpen(false)}
-                  className="lg:hidden p-2 -mr-2"
-                >
-                  <X className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
-
-              <div className="flex-1 p-2">
-                <div className="space-y-1">
-                  {[
-                    { icon: Inbox, label: "Inbox", count: 3, active: true },
-                    { icon: Star, label: "Starred", count: 0 },
-                    { icon: Send, label: "Sent", count: 12 },
-                    { icon: Archive, label: "Archive", count: 45 },
-                    { icon: Trash2, label: "Trash", count: 2 },
-                    
-                  ].map((item, i) => (
-                    <motion.div
-                      key={item.label}
-                      whileHover={{ backgroundColor: "rgba(59, 130, 246, 0.1)" }}
-                      className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer ${
-                        item.active ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <item.icon className="w-4 h-4" />
-                        <span className="text-sm font-medium">{item.label}</span>
-                      </div>
-                      {item.count > 0 && (
-                        <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">{item.count}</span>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Overlay for mobile */}
-            {isSidebarOpen && (
-              <div
-                className="lg:hidden fixed inset-0 bg-black opacity-50 z-10"
-                onClick={() => setIsSidebarOpen(false)}
-              ></div>
-            )}
-
-
-            {/* Email Content */}
-            <div className="flex-1 flex flex-col min-w-0 h-full">
-              {/* Email Header */}
-              <div className="p-4 border-b border-gray-200 bg-white flex items-center">
-                {/* Hamburger menu button */}
-                <button
-                  onClick={() => setIsSidebarOpen(true)}
-                  className="lg:hidden mr-4 p-2 -ml-2 text-gray-600"
-                >
-                  <Menu className="w-6 h-6" />
-                </button>
-                <h2 className="text-lg font-semibold text-gray-900">Inbox (geervan99@gmail.com)</h2>
-                
-              </div>
-
-              {/* Email List */}
-              <div className="flex-1 overflow-y-auto">
-                {[
-                  {
-                    from: "Results @Buildfolio",
-                    subject: "Something Exciting for you",
-                    preview: "Hi Geervan, I came across your portfolio and I'm impressed with your work (👉ﾟヮﾟ)👉...",
-                    time: "2h ago",
-                    unread: true,
-                  },
-                  {
-                    from: "GitHub",
-                    subject: "Your repository 'portfolio' received a star!",
-                    preview: "Someone starred your repository. Keep up the great work!",
-                    time: "5h ago",
-                    unread: false,
-                  },
-                  {
-                    from: "LinkedIn",
-                    subject: "You have 3 new connection requests",
-                    preview: "People are interested in connecting with you based on your profile...",
-                    time: "1d ago",
-                    unread: true,
-                  },
-                  {
-                    from: "Stack Overflow",
-                    subject: "Your answer was accepted!",
-                    preview: "Congratulations! Your answer to 'How to center a div' was marked as accepted.",
-                    time: "2d ago",
-                    unread: false,
-                  },
-                  {
-                    from: "Dev Community",
-                    subject: "Weekly digest: Top React articles",
-                    preview: "Here are the most popular React articles from this week...",
-                    time: "3d ago",
-                    unread: false,
-                  },
-                ].map((email, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    whileHover={{ backgroundColor: "rgba(0, 0, 0, 0.02)" }}
-                    className={`p-4 border-b border-gray-100 cursor-pointer ${
-                      email.unread ? "bg-blue-50" : "bg-white"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span
-                            className={`text-sm truncate ${email.unread ? "font-semibold text-gray-900" : "font-medium text-gray-700"}`}
-                          >
-                            {email.from}
-                          </span>
-                          {email.unread && <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0"></div>}
-                        </div>
-                        <h3
-                          className={`text-sm mb-1 truncate ${email.unread ? "font-semibold text-gray-900" : "text-gray-800"}`}
-                        >
-                          {email.subject}
-                        </h3>
-                        <p className="text-sm text-gray-600 truncate">{email.preview}</p>
-                      </div>
-                      <span className="text-xs text-gray-500 ml-4 flex-shrink-0">{email.time}</span>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Quick Actions */}
-              <div className="p-4 bg-gray-50 border-t border-gray-200">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                  <div className="text-sm text-gray-600 text-center md:text-left">
-                    Want to get in touch? Email me directly at:{" "}
-                    <a href="mailto:geervan99@gmail.com" className="text-blue-600 hover:text-blue-800 font-medium">
-                      geervan99@gmail.com
-                    </a>
+                  <div className="flex items-center space-x-3">
+                    <item.icon className="w-4 h-4" />
+                    <span className="text-sm font-medium">{item.label}</span>
                   </div>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() =>
-                      (window.location.href = "mailto:geervan99@gmail.com?subject=Hello from your portfolio!")
-                    }
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm flex items-center space-x-2 w-full md:w-auto"
-                  >
-                    <Mail className="w-4 h-4" />
-                    <a href="mailto:geervan99@gmail.com" target="_blank">Send Email to me</a>
-                  </motion.button>
-                </div>
-              </div>
+                  {item.count > 0 && (
+                    <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">{item.count}</span>
+                  )}
+                </motion.div>
+              ))}
             </div>
           </div>
-        )
+        </div>
+
+        {isSidebarOpen && (
+          <div
+            className="lg:hidden fixed inset-0 bg-black opacity-50 z-10"
+            onClick={() => setIsSidebarOpen(false)}
+          ></div>
+        )}
+
+        <div className="flex-1 flex flex-col min-w-0 h-full">
+          <div className="p-4 border-b border-gray-200 bg-white flex items-center">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="lg:hidden mr-4 p-2 -ml-2 text-gray-600"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <h2 className="text-lg font-semibold text-gray-900">Inbox (geervan99@gmail.com)</h2>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            {[
+              {
+                from: "Results @Buildfolio",
+                subject: "Something Exciting for you",
+                preview: "Hi Geervan, I came across your portfolio and I'm impressed with your work (👉ﾟヮﾟ)👉...",
+                time: "2h ago",
+                unread: true,
+              },
+              { from: "GitHub", subject: "Your repository 'portfolio' received a star!", preview: "Someone starred your repository. Keep up the great work!", time: "5h ago", unread: false },
+              { from: "LinkedIn", subject: "You have 3 new connection requests", preview: "People are interested in connecting with you based on your profile...", time: "1d ago", unread: true },
+              { from: "Stack Overflow", subject: "Your answer was accepted!", preview: "Congratulations! Your answer to 'How to center a div' was marked as accepted.", time: "2d ago", unread: false },
+              { from: "Dev Community", subject: "Weekly digest: Top React articles", preview: "Here are the most popular React articles from this week...", time: "3d ago", unread: false },
+            ].map((email, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ backgroundColor: "rgba(0, 0, 0, 0.02)" }}
+                className={`p-4 border-b border-gray-100 cursor-pointer ${email.unread ? "bg-blue-50" : "bg-white"}`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className={`text-sm truncate ${email.unread ? "font-semibold text-gray-900" : "font-medium text-gray-700"}`}>{email.from}</span>
+                      {email.unread && <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0"></div>}
+                    </div>
+                    <h3 className={`text-sm mb-1 truncate ${email.unread ? "font-semibold text-gray-900" : "text-gray-800"}`}>{email.subject}</h3>
+                    <p className="text-sm text-gray-600 truncate">{email.preview}</p>
+                  </div>
+                  <span className="text-xs text-gray-500 ml-4 flex-shrink-0">{email.time}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Quick Actions Footer */}
+          {/* --- THIS IS THE CORRECTED LINE --- */}
+          <div className="p-4 bg-gray-50 border-t border-gray-200">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="text-sm text-gray-600 text-center md:text-left">
+                Want to get in touch? Email me directly or use the form:{" "}
+                <a href="mailto:geervan99@gmail.com" className="text-blue-600 hover:text-blue-800 font-medium">
+                  geervan99@gmail.com
+                </a>
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsModalOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm flex items-center space-x-2 w-full md:w-auto"
+              >
+                <Mail className="w-4 h-4" />
+                <span>Send me an Email</span>
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* The modal is now rendered here, outside the main layout div */}
+      <AnimatePresence>
+        {isModalOpen && <ContactModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
+      </AnimatePresence>
+    </>
+  );
+        
 
       case "gallery":
         return (
