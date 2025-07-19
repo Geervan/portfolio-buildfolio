@@ -241,7 +241,7 @@ export default function AppContent({ app, isMobile = false, onOpenApp, onShutdow
           <div className="p-4 bg-gray-50 border-t border-gray-200">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="text-sm text-gray-600 text-center md:text-left">
-                Want to get in touch? Email me directly or use the form:{" "}
+                Want to get in touch? Email me directly or use the button:{" "}
                 <a href="mailto:geervan99@gmail.com" className="text-blue-600 hover:text-blue-800 font-medium">
                   geervan99@gmail.com
                 </a>

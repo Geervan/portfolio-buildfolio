@@ -124,7 +124,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
               <div className="flex items-center justify-between">
                 <button
                   type="submit"
-                  disabled={status === "sending"}
+                    disabled={status === "sending" || !name || !email || !message}
                   className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center space-x-2"
                 >
                   {status === "sending" ? (
