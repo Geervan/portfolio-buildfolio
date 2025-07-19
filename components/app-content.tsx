@@ -555,7 +555,7 @@ case "resume":
                 <h3 className="text-lg font-semibold text-white">Certifications & Tools</h3>
                 <div className="space-y-4">
                   {[
-                     { category: "Tools", items: ["Git", "Vercel","Notion","Google Docs"] },
+                     { category: "Tools", items: ["Git", "Vercel","VsCode","CLI","Notion","Google Docs"] },
                     { category: "Postman API Fundamentals Student Expert", items: ["Postman API"] },
                     { category: "Design Tools", items: ["Figma", "Canva"] },
                     { category: "Databases", items: ["MongoDB", "PostgreSQL","MySQL"] },
