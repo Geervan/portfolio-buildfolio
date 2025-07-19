@@ -822,7 +822,7 @@ case "resume":
                   transition={{ delay: 0.2 }}
                   className="bg-white/10 backdrop-blur-xl rounded-lg p-6 text-left space-y-6 border border-purple-500/30 shadow-lg"
                 >
-                  <h3 className="text-xl font-semibold text-white text-center">My Philosophy</h3>
+                  <h3 className="text-xl font-semibold text-white text-center">My Motto</h3>
                   <p className="text-purple-200 text-base leading-relaxed text-center">
                     "My compiler and I are in a toxic relationship but hey we ship cool stuff."
                   </p>
