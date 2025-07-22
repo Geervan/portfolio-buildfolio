@@ -80,7 +80,7 @@ export default function DesktopLayout() {
   const professionalApps = apps.filter((app) =>
     ["resume", "projects", "skills", "gallery", "vscode", "geervan", "terminal", "email","github","linkedin","help"].includes(app.id),
   )
-  const funApps = apps.filter((app) => ["hobbies","games", "for-fun", "easter-egg", "recycle-bin"].includes(app.id))
+  const funApps = apps.filter((app) => ["hobbies","games", "for-fun", "easter-egg", "messages", "recycle-bin"].includes(app.id))
 
   return (
     <div

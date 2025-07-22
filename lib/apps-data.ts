@@ -101,7 +101,12 @@ export const apps = [
     name:"Help",
     icon:"❓",
     color: "#BDB1FC"
-  }
-  
+  },
+   {
+    id: "messages",
+    name: "Guest Wall",
+    icon: "💬",
+    color: "#10b981", 
+  },
   
 ]

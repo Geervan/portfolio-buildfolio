@@ -28,10 +28,19 @@ interface AppContentProps {
     name: string
     icon: string
   }
+
+  
   isMobile?: boolean
   onOpenApp?: (appId: string) => void
   onShutdown?: () => void
 }
+
+type Message = {
+  id: string;
+  name: string;
+  message: string;
+  createdAt: string; // Will be a string after coming from the API
+};
 
 export default function AppContent({ app, isMobile = false, onOpenApp, onShutdown }: AppContentProps) {
   const [skillLevels, setSkillLevels] = useState({
@@ -957,7 +966,188 @@ case "resume":
       </div>
     </div>
   );
+// Inside the switch statement in AppContent.tsx
 
+case "messages":
+  // Type definition for a single message object
+  type Message = {
+    id: string;
+    name: string;
+    message: string;
+    createdAt: string;
+  };
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [name, setName] = useState("");
+  const [newMessage, setNewMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isPosting, setIsPosting] = useState(false);
+
+  const fetchMessages = async () => {
+    try {
+      if (!messages.length) setIsLoading(true);
+      const response = await fetch('/api/messages');
+      if (!response.ok) throw new Error('Failed to fetch messages.');
+      const data = await response.json();
+      setMessages(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !newMessage.trim() || isPosting) return;
+
+    setIsPosting(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, message: newMessage }),
+      });
+      if (!response.ok) throw new Error('Failed to post message. Please try again.');
+      setName("");
+      setNewMessage("");
+      await fetchMessages();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsPosting(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const adminKey = prompt("Please enter the admin key to delete this message:");
+    if (!adminKey) return;
+
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminKey}`,
+        },
+        body: JSON.stringify({ id }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete message. (Check admin key)');
+      }
+      alert('Message deleted successfully!');
+      await fetchMessages();
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    }
+  };
+
+  return (
+    <div className="h-full flex flex-col bg-slate-800 text-white font-sans">
+      <div className="p-3 border-b border-purple-500/30 bg-slate-900 flex-shrink-0">
+        <h2 className="text-lg font-semibold flex items-center space-x-2">
+          <span>💬</span>
+          <span>Public Messages</span>
+        </h2>
+      </div>
+
+      <div className="flex-1 flex flex-col md:flex-row min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 border-b md:border-b-0 md:border-r border-purple-500/20">
+          {isLoading && <p className="text-purple-300 text-center p-4">Loading messages...</p>}
+          {!isLoading && messages.length === 0 && (
+            <p className="text-slate-400 text-center p-4">No messages yet. Be the first to leave one!</p>
+          )}
+          
+          <AnimatePresence>
+            {!isLoading && messages.map((msg) => {
+              const userInitial = msg.name.charAt(0).toUpperCase() || '?';
+
+              return (
+                <motion.div
+                  key={msg.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                  className="group relative"
+                >
+                  <div className="p-[1px] bg-gradient-to-br from-purple-500/20 to-slate-700/20 rounded-lg 
+                                  transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-lg group-hover:shadow-purple-500/10">
+                    <div className="bg-slate-700/80 rounded-[7px] p-3 flex items-start space-x-3">
+                      <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center font-bold text-white text-lg">
+                        {userInitial}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center mb-1">
+                          <p className="font-semibold text-purple-300 truncate">{msg.name}</p>
+                          <p className="text-xs text-slate-400 flex-shrink-0 ml-2">
+                            {/* {new Date(msg.createdAt).toLocaleString()} */}
+                          </p>
+                        </div>
+                        <p className="text-slate-200 whitespace-pre-line break-words">{msg.message}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(msg.id)}
+                    className="absolute top-2 right-2 p-1.5 bg-red-800/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
+                    title="Delete this message (Admin)"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-300" />
+                  </button>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+
+        <div className="p-4 bg-slate-900/50 flex-shrink-0 md:w-80">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <h3 className="font-semibold text-white">Leave a Message</h3>
+            <div>
+              <label htmlFor="name" className="text-xs text-purple-300 mb-1 block">Name</label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={50}
+                required
+                className="w-full p-2 bg-slate-700 rounded border border-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="newMessage" className="text-xs text-purple-300 mb-1 block">Message</label>
+              <textarea
+                id="newMessage"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                rows={4}
+                maxLength={300}
+                required
+                className="w-full p-2 bg-slate-700 rounded border border-slate-600 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isPosting}
+              className="w-full py-2 bg-purple-600 rounded font-semibold hover:bg-purple-700 transition-colors disabled:bg-purple-800 disabled:cursor-not-allowed"
+            >
+              {isPosting ? "Posting..." : "Post Message"}
+            </button>
+            {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
+          </form>
+        </div>
+      </div>
+    </div>
+  );
       default:
         return (
           <div className={`${containerClass} flex items-center justify-center`}>
