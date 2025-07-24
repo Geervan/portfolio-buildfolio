@@ -10,6 +10,11 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 }
+model Counter {
+  // We will only have one counter, so its ID can be static
+  id    String @id @default("views")
+  count Int    @default(0)
+}
 
 // Our Message model remains the same.
 model Message {
